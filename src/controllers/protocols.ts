@@ -3,7 +3,7 @@ export interface HttpResponse<T> {
   body: T | string | unknown;
 }
 export interface HttpRequest<B> {
-  params?: string;
+  params?: B;
   headers?: unknown;
   body?: B;
 }

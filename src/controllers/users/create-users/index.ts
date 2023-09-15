@@ -1,13 +1,25 @@
 import validator from "validator";
-
 import { User } from "../../../models/users";
 import { HttpRequest, HttpResponse } from "../../protocols";
-import {
-  CreateUserParams,
-  ICreateUserController,
-  ICreateUserRepository,
-} from "./protocols";
+import bcrypt from "bcrypt";
 
+export interface ICreateUserController {
+  handle(
+    httpRequest: HttpRequest<CreateUserParams>
+  ): Promise<HttpResponse<User>>;
+}
+
+export interface CreateUserParams {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  avatar_url: string;
+}
+
+export interface ICreateUserRepository {
+  createUser(params: CreateUserParams): Promise<User>;
+}
 export class CreateUserController implements ICreateUserController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
 
@@ -33,6 +45,13 @@ export class CreateUserController implements ICreateUserController {
           body: `Email ${httpRequest?.body!.email} is invalid`,
         };
       }
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(
+        httpRequest.body!.password,
+        saltRounds
+      );
+
+      httpRequest.body!.password = hashedPassword;
 
       const user = await this.createUserRepository.createUser(
         httpRequest.body!

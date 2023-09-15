@@ -1,8 +1,9 @@
 import { avatarUrl } from "../../../assets/data";
 import {
-  CreateUserParams,
   ICreateUserRepository,
-} from "../../../controllers/users/create-users/protocols";
+  CreateUserParams,
+} from "../../../controllers/users/create-users";
+
 import { MongoClient } from "../../../database/mongo";
 import { User } from "../../../models/users";
 
