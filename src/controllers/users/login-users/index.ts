@@ -1,13 +1,7 @@
-// login-controller.ts
-
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../../../models/users";
-import { HttpRequest, HttpResponse } from "../../protocols";
-
-export interface ILoginController {
-  handle(httpRequest: HttpRequest<LoginParams>): Promise<HttpResponse<string>>;
-}
+import { HttpRequest, HttpResponse, IUserController } from "../../protocols";
 
 export interface LoginParams {
   email: string;
@@ -18,7 +12,7 @@ export interface ILoginRepository {
   getUserByEmail(email: string): Promise<User | null>;
 }
 
-export class LoginController implements ILoginController {
+export class LoginController implements IUserController {
   constructor(private readonly loginRepository: ILoginRepository) {}
 
   async handle(

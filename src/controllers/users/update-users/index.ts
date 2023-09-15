@@ -1,7 +1,8 @@
 import { User } from "../../../models/users";
-import { HttpRequest, HttpResponse } from "../../protocols";
+import { HttpRequest, HttpResponse, IUserController } from "../../protocols";
 
 export interface UpdateUserParams {
+  id: string;
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -9,20 +10,25 @@ export interface UpdateUserParams {
   avatar_url?: string;
 }
 
-export interface IUpdateUserController {
-  handle(httpRequest: HttpRequest<any>): Promise<HttpResponse<User>>;
-}
-
 export interface IUpdateUserRepository {
   updateUser(id: string, params: UpdateUserParams): Promise<User>;
 }
 
-export class UpdateUserController implements IUpdateUserController {
+export class UpdateUserController implements IUserController {
   constructor(private readonly updateUserRepository: IUpdateUserRepository) {}
-  async handle(httpRequest: HttpRequest<any>): Promise<HttpResponse<User>> {
+  async handle(
+    httpRequest: HttpRequest<UpdateUserParams>
+  ): Promise<HttpResponse<User | string>> {
     try {
       const id = httpRequest?.params?.id;
       const body = httpRequest?.body;
+
+      if (!body) {
+        return {
+          statusCode: 400,
+          body: "Body is required",
+        };
+      }
 
       if (!id) {
         return {

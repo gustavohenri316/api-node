@@ -1,13 +1,7 @@
 import validator from "validator";
 import { User } from "../../../models/users";
-import { HttpRequest, HttpResponse } from "../../protocols";
+import { HttpRequest, HttpResponse, IUserController } from "../../protocols";
 import bcrypt from "bcrypt";
-
-export interface ICreateUserController {
-  handle(
-    httpRequest: HttpRequest<CreateUserParams>
-  ): Promise<HttpResponse<User>>;
-}
 
 export interface CreateUserParams {
   firstName: string;
@@ -20,7 +14,7 @@ export interface CreateUserParams {
 export interface ICreateUserRepository {
   createUser(params: CreateUserParams): Promise<User>;
 }
-export class CreateUserController implements ICreateUserController {
+export class CreateUserController implements IUserController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
 
   async handle(

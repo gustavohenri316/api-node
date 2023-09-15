@@ -1,16 +1,19 @@
 import { User } from "../../../models/users";
-import { HttpRequest, HttpResponse } from "../../protocols";
+import { IUserController, HttpRequest, HttpResponse } from "../../protocols";
 
 export interface IDeleteUserRepository {
   deleteUser(id: string): Promise<User>;
 }
-export interface IDeleteUserController {
-  handle(httpRequest: HttpRequest<any>): Promise<HttpResponse<User>>;
+
+export interface IDeleteUserParams {
+  id: string;
 }
 
-export class DeleteUserController implements IDeleteUserController {
+export class DeleteUserController implements IUserController {
   constructor(private readonly deleteUserRepository: IDeleteUserRepository) {}
-  async handle(httpRequest: HttpRequest<any>): Promise<HttpResponse<User>> {
+  async handle(
+    httpRequest: HttpRequest<IDeleteUserParams>
+  ): Promise<HttpResponse<User>> {
     try {
       const id = httpRequest?.params?.id;
 

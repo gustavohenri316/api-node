@@ -7,3 +7,7 @@ export interface HttpRequest<B> {
   headers?: unknown;
   body?: B;
 }
+
+export interface IUserController {
+  handle(httpRequest: HttpRequest<unknown>): Promise<HttpResponse<unknown>>;
+}

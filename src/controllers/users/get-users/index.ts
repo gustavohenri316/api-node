@@ -1,15 +1,11 @@
 import { User } from "../../../models/users";
-import { HttpResponse } from "../../protocols";
-
-export interface IGetUsersController {
-  handle(): Promise<HttpResponse<User[]>>;
-}
+import { IUserController } from "../../protocols";
 
 export interface IGetUsersRepository {
   getUsers(): Promise<User[]>;
 }
 
-export class GetUsersController implements IGetUsersController {
+export class GetUsersController implements IUserController {
   constructor(private readonly getUsersRepository: IGetUsersRepository) {}
   async handle() {
     try {
