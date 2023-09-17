@@ -9,6 +9,10 @@ import { LoginController } from "../controllers/users/login-users";
 import { MongoLoginRepository } from "../repositories/users/login-users";
 import { DeleteUserController } from "../controllers/users/delete-users";
 import { MongoDeleteUserRepository } from "../repositories/users/delete-users";
+import { CreateProductsController } from "../controllers/products/create-products";
+import { MongoCreateProductsRepository } from "../repositories/products/create-products";
+import { GetProductsController } from "../controllers/products/get-products";
+import { MongoGetProductRepository } from "../repositories/products/get-products";
 
 const router = Router();
 
@@ -62,4 +66,33 @@ router.post("/login", async (req, res) => {
   res.status(statusCode).send(body);
 });
 
+router.post("/products", async (req, res) => {
+  const mongoCreateProductsRepository = new MongoCreateProductsRepository();
+  const createProductsController = new CreateProductsController(
+    mongoCreateProductsRepository
+  );
+  const { body, statusCode } = await createProductsController.handle({
+    body: req.body,
+  });
+  res.status(statusCode).send(body);
+});
+
+router.get("/products", async (req, res) => {
+  const mongoGetProductsRepository = new MongoGetProductRepository();
+  const getProductsController = new GetProductsController(
+    mongoGetProductsRepository
+  );
+
+  const page = parseInt(req.query.page as string, 10) || 1;
+  const itemsPerPage = parseInt(req.query.itemsPerPage as string, 10) || 10;
+
+  const { body, statusCode } = await getProductsController.handle({
+    params: {
+      page: page,
+      itemsPerPage: itemsPerPage,
+    },
+  });
+
+  res.status(statusCode).send(body);
+});
 export default router;

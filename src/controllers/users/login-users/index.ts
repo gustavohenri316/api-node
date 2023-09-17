@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../../../models/users";
-import { HttpRequest, HttpResponse, IUserController } from "../../protocols";
+import { HttpRequest, HttpResponse, IController } from "../../protocols";
+import { error, success } from "../../helpers";
 
 export interface LoginParams {
   email: string;
@@ -12,7 +13,7 @@ export interface ILoginRepository {
   getUserByEmail(email: string): Promise<User | null>;
 }
 
-export class LoginController implements IUserController {
+export class LoginController implements IController {
   constructor(private readonly loginRepository: ILoginRepository) {}
 
   async handle(
@@ -22,28 +23,19 @@ export class LoginController implements IUserController {
       const body = httpRequest?.body;
 
       if (!body) {
-        return {
-          statusCode: 400,
-          body: "Bad Request",
-        };
+        return error("Bad Request");
       }
 
       const user = await this.loginRepository.getUserByEmail(body.email);
 
       if (!user) {
-        return {
-          statusCode: 401,
-          body: "Authentication failed",
-        };
+        return error("Authentication failed", 401);
       }
 
       const passwordMatch = await bcrypt.compare(body.password, user.password);
 
       if (!passwordMatch) {
-        return {
-          statusCode: 401,
-          body: "Authentication failed",
-        };
+        return error("Authentication failed", 401);
       }
 
       const token = jwt.sign(
@@ -58,23 +50,18 @@ export class LoginController implements IUserController {
         { expiresIn: "1h" }
       );
 
-      return {
-        statusCode: 200,
-        body: {
-          token,
-          user: {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            avatar_url: user.avatar_url,
-          },
+      const send = {
+        token,
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          avatar_url: user.avatar_url,
         },
       };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: "Something went wrong",
-      };
+      return success(send);
+    } catch (err) {
+      return error("Something went wrong", 500);
     }
   }
 }

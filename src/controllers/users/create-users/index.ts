@@ -1,7 +1,8 @@
 import validator from "validator";
 import { User } from "../../../models/users";
-import { HttpRequest, HttpResponse, IUserController } from "../../protocols";
+import { HttpRequest, HttpResponse, IController } from "../../protocols";
 import bcrypt from "bcrypt";
+import { created, error } from "../../helpers";
 
 export interface CreateUserParams {
   firstName: string;
@@ -14,7 +15,7 @@ export interface CreateUserParams {
 export interface ICreateUserRepository {
   createUser(params: CreateUserParams): Promise<User>;
 }
-export class CreateUserController implements IUserController {
+export class CreateUserController implements IController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
 
   async handle(
@@ -25,19 +26,13 @@ export class CreateUserController implements IUserController {
 
       for (const field of requiredFields) {
         if (!httpRequest?.body?.[field as keyof CreateUserParams]?.length) {
-          return {
-            statusCode: 400,
-            body: `Field ${field} is required`,
-          };
+          return error(`Field ${field} is required`);
         }
       }
 
       const emailIsValid = validator.isEmail(httpRequest?.body!.email);
       if (!emailIsValid) {
-        return {
-          statusCode: 400,
-          body: `Email ${httpRequest?.body!.email} is invalid`,
-        };
+        return error(`Email ${httpRequest?.body!.email} is invalid`);
       }
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(
@@ -50,11 +45,7 @@ export class CreateUserController implements IUserController {
       const user = await this.createUserRepository.createUser(
         httpRequest.body!
       );
-
-      return {
-        statusCode: 201,
-        body: user,
-      };
+      return created(user);
     } catch (error) {
       return {
         statusCode: 500,
