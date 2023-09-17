@@ -20,7 +20,17 @@ interface ProductsWithUser {
 }
 
 export interface IGetProductsRepository {
-  getProducts(page: number, itemsPerPage: number): Promise<Products[]>;
+  getProducts(
+    page: number,
+    itemsPerPage: number,
+    filters: {
+      id?: string;
+      description?: string;
+      category?: string;
+      supplier?: string;
+      userWhoRegistered?: string;
+    }
+  ): Promise<Products[]>;
   getTotalItems(): Promise<number>;
   getUserById(userId: ObjectId): Promise<User | null>;
 }
@@ -29,7 +39,17 @@ export class GetProductsController implements IController {
   constructor(private readonly getProductsRepository: IGetProductsRepository) {}
 
   async handle(
-    httpRequest: HttpRequest<{ page: number; itemsPerPage: number }>
+    httpRequest: HttpRequest<{
+      page: number;
+      itemsPerPage: number;
+      query: {
+        id?: string;
+        description?: string;
+        category?: string;
+        supplier?: string;
+        userWhoRegistered?: string;
+      };
+    }>
   ): Promise<
     HttpResponse<{
       data: ProductsWithUser[];
@@ -39,14 +59,16 @@ export class GetProductsController implements IController {
     }>
   > {
     try {
-      const { page, itemsPerPage } = httpRequest.params || {
+      const { page, itemsPerPage, query } = httpRequest.params || {
         page: 1,
         itemsPerPage: 10,
+        query: {},
       };
 
       const products = await this.getProductsRepository.getProducts(
         page,
-        itemsPerPage
+        itemsPerPage,
+        query
       );
 
       const totalItems = await this.getProductsRepository.getTotalItems();

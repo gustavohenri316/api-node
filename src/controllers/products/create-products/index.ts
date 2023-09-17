@@ -1,4 +1,5 @@
 import { Products } from "../../../models/products";
+import { created, error } from "../../helpers";
 import { HttpRequest, HttpResponse, IController } from "../../protocols";
 import validator from "validator";
 
@@ -26,12 +27,7 @@ export class CreateProductsController implements IController {
   ): Promise<HttpResponse<Products>> {
     try {
       if (!httpRequest?.body) {
-        return {
-          statusCode: 400,
-          body: {
-            message: "Body is required",
-          },
-        };
+        return error("Body is required");
       }
       const {
         id,
@@ -52,24 +48,15 @@ export class CreateProductsController implements IController {
         !category ||
         !supplier
       ) {
-        return {
-          statusCode: 400,
-          body: "Missing required fields for product creation.",
-        };
+        return error("Missing required fields for product creation.");
       }
 
       if (!validator.isNumeric(quantity.toString())) {
-        return {
-          statusCode: 400,
-          body: "Quantity must be a numeric value.",
-        };
+        return error("Quantity must be a numeric value.");
       }
 
       if (!validator.isNumeric(price.toString())) {
-        return {
-          statusCode: 400,
-          body: "Price must be a numeric value.",
-        };
+        return error("Price must be a numeric value.");
       }
 
       const product: CreateProductsParams = {
@@ -85,16 +72,9 @@ export class CreateProductsController implements IController {
 
       const createdProduct =
         await this.createProductsRepository.createProducts(product);
-
-      return {
-        statusCode: 201,
-        body: createdProduct,
-      };
+      return created(createdProduct);
     } catch (err) {
-      return {
-        statusCode: 500,
-        body: "Something went wrong.",
-      };
+      return error("Something went wrong.", 500);
     }
   }
 }
