@@ -57,7 +57,6 @@ export class GetProductsController implements IController {
         const user = await this.getProductsRepository.getUserById(
           new ObjectId(product.userWhoRegistered)
         );
-        console.log(user, "User");
 
         if (user) {
           const name = `${user.firstName} ${user.lastName}`;

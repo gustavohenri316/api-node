@@ -36,14 +36,11 @@ export class MongoGetProductRepository implements IGetProductsRepository {
         .findOne({ _id: userId });
 
       if (user) {
-        console.log(`Found user: ${user.firstName} ${user.lastName}`);
         return user;
       } else {
-        console.log(`User with ID ${userId} not found.`);
         return null;
       }
     } catch (error) {
-      console.error(`Error fetching user by ID ${userId}: ${error}`);
       return null;
     }
   }

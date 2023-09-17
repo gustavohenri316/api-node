@@ -13,6 +13,8 @@ import { CreateProductsController } from "../controllers/products/create-product
 import { MongoCreateProductsRepository } from "../repositories/products/create-products";
 import { GetProductsController } from "../controllers/products/get-products";
 import { MongoGetProductRepository } from "../repositories/products/get-products";
+import { MongoUpdateProductsRepository } from "../repositories/products/update-products";
+import { UpdateProductsController } from "../controllers/products/update-products";
 
 const router = Router();
 
@@ -93,6 +95,18 @@ router.get("/products", async (req, res) => {
     },
   });
 
+  res.status(statusCode).send(body);
+});
+
+router.patch("/products/:id", async (req, res) => {
+  const mongoUpdateProductsRepository = new MongoUpdateProductsRepository();
+  const updateProductsController = new UpdateProductsController(
+    mongoUpdateProductsRepository
+  );
+  const { body, statusCode } = await updateProductsController.handle({
+    body: req.body,
+    params: req.params,
+  });
   res.status(statusCode).send(body);
 });
 export default router;
