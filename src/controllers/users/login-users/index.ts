@@ -21,19 +21,16 @@ export class LoginController implements IController {
   ): Promise<HttpResponse<string>> {
     try {
       const body = httpRequest?.body;
-
       if (!body) {
         return error("Bad Request");
       }
 
       const user = await this.loginRepository.getUserByEmail(body.email);
-
       if (!user) {
         return error("Authentication failed", 401);
       }
 
       const passwordMatch = await bcrypt.compare(body.password, user.password);
-
       if (!passwordMatch) {
         return error("Authentication failed", 401);
       }

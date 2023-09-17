@@ -15,12 +15,12 @@ const UserRouter = Router();
 UserRouter.get("/users", async (req, res) => {
   const page = parseInt(req.query.page as string) || 1;
   const itemsPerPage = parseInt(req.query.itemsPerPage as string) || 10;
-
+  const search = req.query.search as string | undefined;
   const mongoGetUserRepository = new MongoGetUserRepository();
   const getUsersController = new GetUsersController(mongoGetUserRepository);
 
   const { body, statusCode } = await getUsersController.handle({
-    params: { page, itemsPerPage },
+    params: { page, itemsPerPage, search },
   });
 
   res.status(statusCode).send(body);
