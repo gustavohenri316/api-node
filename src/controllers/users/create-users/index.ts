@@ -46,11 +46,8 @@ export class CreateUserController implements IController {
         httpRequest.body!
       );
       return created(user);
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: "Something went wrong",
-      };
+    } catch (err) {
+      return error("Something went wrong", 500);
     }
   }
 }

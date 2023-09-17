@@ -19,25 +19,18 @@ export class CreateRolesController implements IController {
     httpRequest: HttpRequest<CreateRolesParams>
   ): Promise<HttpResponse<Role>> {
     try {
-      const userId = httpRequest?.body?.userId;
+      const { userId, title, description } = httpRequest.body || {};
 
-      console.log(userId);
-
-      if (!userId) {
-        return error("User id is missing", 401);
+      if (!userId || !title || !description) {
+        return error("User id, title, and description are required", 400);
       }
 
-      const requiredFields = ["title", "description"];
+      const roles = await this.createRolesRepository.createRoles({
+        userId,
+        title,
+        description,
+      });
 
-      for (const field of requiredFields) {
-        if (!httpRequest?.body?.[field as keyof CreateRolesParams]?.length) {
-          return error(`Field ${field} is required`);
-        }
-      }
-
-      const roles = await this.createRolesRepository.createRoles(
-        httpRequest.body!
-      );
       return created(roles);
     } catch (error) {
       return {

@@ -7,11 +7,11 @@ import { Role } from "../../../models/roles";
 
 export class MongoCreateRolesRepository implements ICreateRolesRepository {
   async createRoles(params: CreateRolesParams): Promise<Role> {
-    const userId = params.userId;
+    const { userId, title, description } = params;
 
     const roleToCreate = {
-      title: params.title,
-      description: params.description,
+      title,
+      description,
       createdAt: new Date(),
       createdBy: userId,
     };

@@ -40,9 +40,9 @@ export class GetProductsController implements IController {
 
   async handle(
     httpRequest: HttpRequest<{
-      page: number;
-      itemsPerPage: number;
-      query: {
+      page?: number;
+      itemsPerPage?: number;
+      query?: {
         id?: string;
         description?: string;
         category?: string;
@@ -59,56 +59,81 @@ export class GetProductsController implements IController {
     }>
   > {
     try {
-      const { page, itemsPerPage, query } = httpRequest.params || {
-        page: 1,
-        itemsPerPage: 10,
-        query: {},
-      };
+      const {
+        page = 1,
+        itemsPerPage = 10,
+        query = {},
+      } = httpRequest.params || {};
 
-      const products = await this.getProductsRepository.getProducts(
+      const { data, totalItems } = await this.retrieveData(
         page,
         itemsPerPage,
         query
       );
 
-      const totalItems = await this.getProductsRepository.getTotalItems();
-
-      const productsWithUser: ProductsWithUser[] = [];
-
-      for (const product of products) {
-        const user = await this.getProductsRepository.getUserById(
-          new ObjectId(product.userWhoRegistered)
-        );
-
-        if (user) {
-          const name = `${user.firstName} ${user.lastName}`;
-          const productWithUser: ProductsWithUser = {
-            id: product.id,
-            description: product.description,
-            quantity: product.quantity,
-            price: product.price,
-            image: product.image,
-            category: product.category,
-            supplier: product.supplier,
-            userWhoRegistered: product.userWhoRegistered,
-            user: {
-              id: user.id,
-              name,
-            },
-          };
-
-          productsWithUser.push(productWithUser);
-        }
-      }
-
       return success({
         page,
         itemsPerPage,
         totalItems,
-        data: productsWithUser,
+        data,
       });
     } catch (err) {
       return error("Something went wrong.", 500);
     }
+  }
+
+  private async retrieveData(
+    page: number,
+    itemsPerPage: number,
+    query: {
+      id?: string;
+      description?: string;
+      category?: string;
+      supplier?: string;
+      userWhoRegistered?: string;
+    }
+  ): Promise<{ data: ProductsWithUser[]; totalItems: number }> {
+    const products = await this.getProductsRepository.getProducts(
+      page,
+      itemsPerPage,
+      query
+    );
+
+    const userIds = products.map(
+      (product) => new ObjectId(product.userWhoRegistered)
+    );
+    const users = await Promise.all(
+      userIds.map((userId) => this.getProductsRepository.getUserById(userId))
+    );
+
+    const productsWithUser: ProductsWithUser[] = [];
+
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const user = users[i];
+      if (user) {
+        const name = `${user.firstName} ${user.lastName}`;
+        const productWithUser: ProductsWithUser = {
+          id: product.id,
+          description: product.description,
+          quantity: product.quantity,
+          price: product.price,
+          image: product.image,
+          category: product.category,
+          supplier: product.supplier,
+          userWhoRegistered: product.userWhoRegistered,
+          user: {
+            id: user.id,
+            name,
+          },
+        };
+
+        productsWithUser.push(productWithUser);
+      }
+    }
+
+    const totalItems = await this.getProductsRepository.getTotalItems();
+
+    return { data: productsWithUser, totalItems };
   }
 }

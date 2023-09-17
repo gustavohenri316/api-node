@@ -12,11 +12,13 @@ export interface CreateProductsParams {
   category: string;
   supplier: string;
   userWhoRegistered: string;
+  [key: string]: unknown;
 }
 
 export interface ICreateProductsRepository {
   createProducts(params: CreateProductsParams): Promise<Products>;
 }
+
 export class CreateProductsController implements IController {
   constructor(
     private readonly createProductsRepository: ICreateProductsRepository
@@ -26,9 +28,12 @@ export class CreateProductsController implements IController {
     httpRequest: HttpRequest<CreateProductsParams>
   ): Promise<HttpResponse<Products>> {
     try {
-      if (!httpRequest?.body) {
+      const body = httpRequest?.body;
+
+      if (!body) {
         return error("Body is required");
       }
+
       const {
         id,
         description,
@@ -38,17 +43,21 @@ export class CreateProductsController implements IController {
         category,
         supplier,
         userWhoRegistered,
-      } = httpRequest.body;
+      } = body;
 
-      if (
-        !id ||
-        !description ||
-        !quantity ||
-        !price ||
-        !category ||
-        !supplier
-      ) {
-        return error("Missing required fields for product creation.");
+      const requiredFields = [
+        "id",
+        "description",
+        "quantity",
+        "price",
+        "category",
+        "supplier",
+      ];
+
+      for (const field of requiredFields) {
+        if (!body[field]) {
+          return error(`Field ${field} is required.`);
+        }
       }
 
       if (!validator.isNumeric(quantity.toString())) {
