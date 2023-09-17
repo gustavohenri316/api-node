@@ -13,12 +13,18 @@ import { MongoUpdateUserRepository } from "../../repositories/users/update-users
 const UserRouter = Router();
 
 UserRouter.get("/users", async (req, res) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const itemsPerPage = parseInt(req.query.itemsPerPage as string) || 10;
+
   const mongoGetUserRepository = new MongoGetUserRepository();
   const getUsersController = new GetUsersController(mongoGetUserRepository);
-  const { body, statusCode } = await getUsersController.handle();
+
+  const { body, statusCode } = await getUsersController.handle({
+    params: { page, itemsPerPage },
+  });
+
   res.status(statusCode).send(body);
 });
-
 UserRouter.post("/users", async (req, res) => {
   const mongoCreateUserRepository = new MongoCreateUserRepository();
   const createUserController = new CreateUserController(
