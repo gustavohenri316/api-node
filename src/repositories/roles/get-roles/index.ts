@@ -18,7 +18,7 @@ export class MongoGetRoleRepository implements IGetRolesRepository {
       const searchRegex = new RegExp(search, "i");
       query.push(
         { id: searchRegex },
-        { name: searchRegex },
+        { title: searchRegex },
         { description: searchRegex },
         { createdBy: searchRegex }
       );
