@@ -22,7 +22,7 @@ class CreateProductsRepositoryMock implements ICreateProductsRepository {
 }
 
 describe("CreateProductsController", () => {
-  it("deve criar um novo produto", async () => {
+  it("Must create a new product", async () => {
     const params: CreateProductsParams = {
       id: "product123",
       description: "Produto de teste",
