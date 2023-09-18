@@ -5,6 +5,8 @@ import { GetRolesController } from "../../controllers/roles/get-roles";
 import { MongoGetRoleRepository } from "../../repositories/roles/get-roles";
 import { UpdateRoleController } from "../../controllers/roles/update-roles";
 import { MongoUpdateRoleRepository } from "../../repositories/roles/update-roles";
+import { DeleteRoleController } from "../../controllers/roles/delete-roles";
+import { MongoDeleteRoleRepository } from "../../repositories/roles/delete-roles";
 
 const RoleRouter = Router();
 
@@ -38,6 +40,17 @@ RoleRouter.patch("/roles/:id", async (req, res) => {
   );
   const { body, statusCode } = await updateRoleController.handle({
     body: req.body,
+    params: req.params,
+  });
+  res.status(statusCode).send(body);
+});
+
+RoleRouter.delete("/roles/:id", async (req, res) => {
+  const mongoDeleteRoleRepository = new MongoDeleteRoleRepository();
+  const deleteRoleController = new DeleteRoleController(
+    mongoDeleteRoleRepository
+  );
+  const { body, statusCode } = await deleteRoleController.handle({
     params: req.params,
   });
   res.status(statusCode).send(body);
