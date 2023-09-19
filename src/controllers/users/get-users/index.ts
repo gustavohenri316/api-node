@@ -1,3 +1,5 @@
+import { Permission } from "../../../models/permissions";
+import { Role } from "../../../models/roles";
 import { User } from "../../../models/users";
 import { error, success } from "../../helpers";
 import { HttpRequest, IController } from "../../protocols";
@@ -8,12 +10,14 @@ export interface IGetUsersRepository {
     itemsPerPage: number,
     search?: string
   ): Promise<{ users: User[]; totalItems: number }>;
-
   getUserById(userId: string): Promise<User | null>;
+  getRolesForUser(userId: string): Promise<Role | null>;
+  getPermissionsForUser(userId: string[]): Promise<Permission[]>;
 }
 
 export class GetUsersController implements IController {
   constructor(private readonly getUsersRepository: IGetUsersRepository) {}
+
   async handle(
     httpRequest: HttpRequest<{
       page: number;
@@ -41,23 +45,43 @@ export class GetUsersController implements IController {
         search
       );
 
-      const usersNotPassword = users.map((user) => {
-        return {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          avatar_url: user.avatar_url,
-        };
-      });
+      const usersWithRolesAndPermissions = await Promise.all(
+        users.map(async (user) => {
+          const roles = await this.getUsersRepository.getRolesForUser(
+            user.roles
+          );
+          const permissions =
+            await this.getUsersRepository.getPermissionsForUser(
+              user.permissions.map((permission) => permission)
+            );
+
+          return {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            avatar_url: user.avatar_url,
+            roles: {
+              title: roles && roles.title,
+              description: roles && roles.description,
+            },
+            permissions: permissions.map((permission: Permission) => {
+              return {
+                title: permission.title,
+                key: permission.key,
+              };
+            }),
+          };
+        })
+      );
       return success({
         page,
         itemsPerPage,
         totalItems,
-        users: usersNotPassword,
+        users: usersWithRolesAndPermissions,
       });
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error("Ocorreu um erro.", 500);
     }
   }
 }

@@ -10,6 +10,8 @@ export interface CreateUserParams {
   email: string;
   password: string;
   avatar_url: string;
+  roles?: string;
+  permissions?: Array<string>;
 }
 
 export interface ICreateUserRepository {

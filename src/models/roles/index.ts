@@ -3,5 +3,9 @@ export interface Role {
   title: string;
   description: string;
   createdAt: Date;
-  createdBy: string;
+  createdBy: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }

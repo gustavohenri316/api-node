@@ -9,12 +9,13 @@ export interface UpdateUserParams {
   email?: string;
   password?: string;
   avatar_url?: string;
+  roles?: string;
+  permissions?: Array<string>;
 }
 
 export interface IUpdateUserRepository {
   updateUser(id: string, params: UpdateUserParams): Promise<User>;
 }
-
 export class UpdateUserController implements IController {
   constructor(private readonly updateUserRepository: IUpdateUserRepository) {}
   async handle(
@@ -37,12 +38,13 @@ export class UpdateUserController implements IController {
         "email",
         "password",
         "avatar_url",
+        "roles",
+        "permissions",
       ];
 
       const someFieldIsNotAllowedToUpdate = Object.keys(body).some(
         (key) => !allowedFieldsTtoUpdate.includes(key as keyof UpdateUserParams)
       );
-
       if (someFieldIsNotAllowedToUpdate) {
         return error("Some field is not allowed to update");
       }

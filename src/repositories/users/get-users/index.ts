@@ -2,6 +2,8 @@ import { ObjectId } from "mongodb";
 import { IGetUsersRepository } from "../../../controllers/users/get-users";
 import { MongoClient } from "../../../database/mongo";
 import { User } from "../../../models/users";
+import { Role } from "../../../models/roles";
+import { Permission } from "../../../models/permissions";
 
 export class MongoGetUserRepository implements IGetUsersRepository {
   async getUsers(
@@ -28,14 +30,12 @@ export class MongoGetUserRepository implements IGetUsersRepository {
 
     const collection = MongoClient.db.collection<User>("users");
     const totalItems = await collection.countDocuments({ $or: query });
-
     const usersCursor = collection
       .find({ $or: query })
       .skip(skip)
       .limit(itemsPerPage);
 
     const users = await usersCursor.toArray();
-
     const usersWithId = users.map(({ _id, ...rest }) => ({
       ...rest,
       id: _id.toHexString(),
@@ -49,16 +49,39 @@ export class MongoGetUserRepository implements IGetUsersRepository {
       const collection = MongoClient.db.collection<User>("users");
       const user = await collection.findOne(
         { _id: new ObjectId(userId) },
-        { projection: { password: 0 } } // Exclui o campo 'password' da consulta
+        { projection: { password: 0 } }
       );
 
       if (user) {
         return { ...user, id: user._id.toHexString() };
       }
-
       return null;
     } catch (error) {
       throw new Error("Error fetching user by ID");
+    }
+  }
+
+  async getRolesForUser(userId: string): Promise<Role | null> {
+    try {
+      const collection = MongoClient.db.collection<Role>("roles");
+      const roles = await collection.findOne({ _id: new ObjectId(userId) });
+      return roles || null;
+    } catch (error) {
+      throw new Error("Erro ao buscar as roles do usuário");
+    }
+  }
+
+  async getPermissionsForUser(userIds: string[]): Promise<Permission[]> {
+    try {
+      const userIdObjects = userIds.map((userId) => new ObjectId(userId));
+      const collection = MongoClient.db.collection<Permission>("permissions");
+      const permissions = await collection
+        .find({ _id: { $in: userIdObjects } })
+        .toArray();
+
+      return permissions;
+    } catch (error) {
+      throw new Error("Erro ao buscar as permissões do usuário");
     }
   }
 }

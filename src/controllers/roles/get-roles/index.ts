@@ -10,8 +10,10 @@ export interface IGetRolesRepository {
   ): Promise<{ roles: Role[]; totalItems: number }>;
 
   getRoleById(RoleId: string): Promise<Role | null>;
+  getUserInfo(
+    userId: string
+  ): Promise<{ firstName: string; lastName: string; email: string } | null>;
 }
-
 export class GetRolesController implements IController {
   constructor(private readonly getRolesRepository: IGetRolesRepository) {}
   async handle(
@@ -29,9 +31,17 @@ export class GetRolesController implements IController {
       } = httpRequest.params || {};
 
       if (search.length === 24) {
-        const Role = await this.getRolesRepository.getRoleById(search);
-        if (Role) {
-          return success({ Role });
+        const role = await this.getRolesRepository.getRoleById(search);
+
+        if (role) {
+          const userInfo = await this.getRolesRepository.getUserInfo(
+            role.createdBy as unknown as string
+          );
+
+          if (userInfo) {
+            role.createdBy = userInfo;
+            return success({ role });
+          }
         }
       }
 
@@ -40,6 +50,15 @@ export class GetRolesController implements IController {
         itemsPerPage,
         search
       );
+
+      roles.forEach(async (role) => {
+        const userInfo = await this.getRolesRepository.getUserInfo(
+          role.createdBy as unknown as string
+        );
+        if (userInfo) {
+          role.createdBy = userInfo;
+        }
+      });
 
       return success({
         page,

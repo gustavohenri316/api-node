@@ -2,6 +2,8 @@ import { ObjectId } from "mongodb";
 import { MongoClient } from "../../../database/mongo";
 import { Role } from "../../../models/roles";
 import { IGetRolesRepository } from "../../../controllers/roles/get-roles";
+import { User } from "../../../models/users";
+import isValidObjectId from "bson-objectid";
 
 export class MongoGetRoleRepository implements IGetRolesRepository {
   async getRoles(
@@ -17,7 +19,6 @@ export class MongoGetRoleRepository implements IGetRolesRepository {
     if (search) {
       const searchRegex = new RegExp(search, "i");
       query.push(
-        { id: searchRegex },
         { title: searchRegex },
         { description: searchRegex },
         { createdBy: searchRegex }
@@ -28,34 +29,78 @@ export class MongoGetRoleRepository implements IGetRolesRepository {
 
     const collection = MongoClient.db.collection<Role>("roles");
     const totalItems = await collection.countDocuments({ $or: query });
-
     const RolesCursor = collection
       .find({ $or: query })
       .skip(skip)
       .limit(itemsPerPage);
 
-    const Roles = await RolesCursor.toArray();
+    const rolesWithUserInfo = await RolesCursor.toArray();
 
-    const RolesWithId = Roles.map(({ _id, ...rest }) => ({
-      ...rest,
-      id: _id.toHexString(),
-    }));
+    const rolesWithoutId = rolesWithUserInfo.map((role) => {
+      const { _id, ...rest } = role;
+      return { ...rest, id: _id.toHexString() };
+    });
 
-    return { roles: RolesWithId, totalItems };
+    for (let i = 0; i < rolesWithoutId.length; i++) {
+      const role = rolesWithoutId[i];
+      if (isValidObjectId(role.createdBy as unknown as string)) {
+        const userInfo = await this.getUserInfo(
+          role.createdBy as unknown as string
+        );
+
+        const createdBy: {
+          firstName: string;
+          lastName: string;
+          email: string;
+        } = userInfo || { firstName: "", lastName: "", email: "" };
+
+        rolesWithoutId[i].createdBy = createdBy;
+      } else {
+        console.error("Invalid userId:", role.createdBy);
+      }
+    }
+
+    return { roles: rolesWithoutId, totalItems };
   }
 
-  async getRoleById(RoleId: string): Promise<Role | null> {
+  async getRoleById(roleId: string): Promise<Role | null> {
     try {
-      const collection = MongoClient.db.collection<Role>("roles");
-      const Role = await collection.findOne({ _id: new ObjectId(RoleId) });
+      const role = await MongoClient.db
+        .collection<Role>("roles")
+        .findOne({ _id: new ObjectId(roleId) }, { projection: { _id: 0 } });
 
-      if (Role) {
-        return { ...Role, id: Role._id.toHexString() };
+      if (role) {
+        console.log(role);
+        return { ...role, id: roleId };
       }
 
       return null;
     } catch (error) {
       throw new Error("Error fetching Role by ID");
+    }
+  }
+
+  async getUserInfo(
+    userId: string
+  ): Promise<{ firstName: string; lastName: string; email: string } | null> {
+    try {
+      if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
+        return null;
+      }
+      const collection = MongoClient.db.collection<Omit<User, "id">>("users");
+      const userInfo = await collection.findOne({ _id: new ObjectId(userId) });
+      if (userInfo) {
+        return {
+          firstName: userInfo.firstName,
+          lastName: userInfo.lastName,
+          email: userInfo.email,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error fetching user information by userId:", error);
+      return null;
     }
   }
 }
