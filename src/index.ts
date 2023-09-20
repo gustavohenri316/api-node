@@ -2,7 +2,6 @@ import express from "express";
 import { config } from "dotenv";
 import { MongoClient } from "./database/mongo";
 import i18n from "./i18n";
-
 import UserRouter from "./routers/users";
 import ProductRouter from "./routers/products";
 import RolesRouter from "./routers/roles";

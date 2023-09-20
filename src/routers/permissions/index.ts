@@ -3,6 +3,8 @@ import { CreatePermissionsController } from "../../controllers/permissions/creat
 import { MongoCreatePermissionsRepository } from "../../repositories/permissions/create-permissions";
 import { GetPermissionsController } from "../../controllers/permissions/get-permissions";
 import { MongoGetPermissionRepository } from "../../repositories/permissions/get-permissions";
+import { UpdatePermissionController } from "../../controllers/permissions/update-permissions";
+import { MongoUpdatePermissionRepository } from "../../repositories/permissions/update-permissions";
 
 const PermissionRouter = Router();
 
@@ -28,6 +30,18 @@ PermissionRouter.get("/permissions", async (req, res) => {
   );
   const { body, statusCode } = await getPermissionsController.handle({
     params: { page, itemsPerPage, search },
+  });
+  res.status(statusCode).send(body);
+});
+
+PermissionRouter.patch("/permissions/:id", async (req, res) => {
+  const mongoUpdatePermissionRepository = new MongoUpdatePermissionRepository();
+  const updatePermissionController = new UpdatePermissionController(
+    mongoUpdatePermissionRepository
+  );
+  const { body, statusCode } = await updatePermissionController.handle({
+    body: req.body,
+    params: req.params,
   });
   res.status(statusCode).send(body);
 });
