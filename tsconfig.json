@@ -8,5 +8,9 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": false,
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.json"
+  ],
 }

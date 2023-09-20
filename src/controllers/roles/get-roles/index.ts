@@ -1,3 +1,4 @@
+import I18n from "../../../i18n";
 import { Role } from "../../../models/roles";
 import { success, error } from "../../helpers";
 import { IController, HttpRequest } from "../../protocols";
@@ -67,7 +68,7 @@ export class GetRolesController implements IController {
         roles,
       });
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

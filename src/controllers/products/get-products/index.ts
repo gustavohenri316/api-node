@@ -3,6 +3,7 @@ import { Products } from "../../../models/products";
 import { error, success } from "../../helpers";
 import { IController, HttpRequest, HttpResponse } from "../../protocols";
 import { User } from "../../../models/users";
+import I18n from "../../../i18n";
 
 interface ProductsWithUser {
   id: string;
@@ -79,7 +80,7 @@ export class GetProductsController implements IController {
         data,
       });
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 

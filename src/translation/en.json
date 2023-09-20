@@ -1,0 +1,14 @@
+{
+  "something.went.wrong": "Something went wrong",
+  "error.fetching.permission.by.id": "Error fetching Permission by ID",
+  "invalid.user.id": "Invalid user id.",
+  "user.id.title.and.description.are.required": "User id, title, and description are required",
+  "body.is.required": "Body is required",
+  "field.is.required": "Field {{field}} is required",
+  "quantity.must.be.a.numeric.value": "Quantity must be a numeric value.",
+  "price.must.be.a.numeric.value": "Price must be a numeric value.",
+  "id.is.required": "Id is required",
+  "missing.id": "Missing {{field}} id",
+  "some.field.is.not.allowed.to.update": "Some field is not allowed to update",
+  "email.is.invalid": "Email {{email}} is invalid"
+}

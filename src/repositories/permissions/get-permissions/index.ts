@@ -50,10 +50,10 @@ export class MongoGetPermissionRepository implements IGetPermissionsRepository {
         );
 
         const createdBy: {
-          firstName: string;
-          lastName: string;
-          email: string;
-        } = userInfo || { firstName: "", lastName: "", email: "" };
+          firstName: string | null;
+          lastName: string | null;
+          email: string | null;
+        } = userInfo || { firstName: null, lastName: null, email: null };
 
         PermissionsWithoutId[i].createdBy = createdBy;
       } else {
@@ -85,9 +85,11 @@ export class MongoGetPermissionRepository implements IGetPermissionsRepository {
     }
   }
 
-  async getUserInfo(
-    userId: string
-  ): Promise<{ firstName: string; lastName: string; email: string } | null> {
+  async getUserInfo(userId: string): Promise<{
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+  } | null> {
     try {
       if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
         return null;
@@ -96,9 +98,9 @@ export class MongoGetPermissionRepository implements IGetPermissionsRepository {
       const userInfo = await collection.findOne({ _id: new ObjectId(userId) });
       if (userInfo) {
         return {
-          firstName: userInfo.firstName,
-          lastName: userInfo.lastName,
-          email: userInfo.email,
+          firstName: userInfo ? userInfo.firstName : null,
+          lastName: userInfo ? userInfo.lastName : null,
+          email: userInfo ? userInfo.email : null,
         };
       }
 

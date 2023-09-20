@@ -1,0 +1,14 @@
+{
+  "something.went.wrong": "Algo deu errado",
+  "error.fetching.permission.by.id": "Erro ao buscar permissão por ID",
+  "invalid.user.id": "ID de usuário inválido.",
+  "user.id.title.and.description.are.required": "ID de usuário, título e descrição são obrigatórios",
+  "body.is.required": "O corpo é obrigatório",
+  "field.is.required": "O campo {{field}} é obrigatório",
+  "quantity.must.be.a.numeric.value": "A quantidade deve ser um valor numérico.",
+  "price.must.be.a.numeric.value": "O preço deve ser um valor numérico.",
+  "id.is.required": "O ID é obrigatório",
+  "missing.id": "Faltando ID de {{field}}",
+  "some.field.is.not.allowed.to.update": "Alguns campos não estão autorizados para atualização",
+  "email.is.invalid": "O email {{email}} é inválido"
+}

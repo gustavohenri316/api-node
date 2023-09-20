@@ -1,6 +1,7 @@
 import { Permission } from "../../../models/permissions";
 import { success, error } from "../../helpers";
 import { IController, HttpRequest } from "../../protocols";
+import I18n from "../../../i18n";
 
 export interface IGetPermissionsRepository {
   getPermissions(
@@ -10,9 +11,11 @@ export interface IGetPermissionsRepository {
   ): Promise<{ Permissions: Permission[]; totalItems: number }>;
 
   getPermissionById(PermissionId: string): Promise<Permission | null>;
-  getUserInfo(
-    userId: string
-  ): Promise<{ firstName: string; lastName: string; email: string } | null>;
+  getUserInfo(userId: string): Promise<{
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+  } | null>;
 }
 export class GetPermissionsController implements IController {
   constructor(
@@ -71,7 +74,7 @@ export class GetPermissionsController implements IController {
         Permissions,
       });
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

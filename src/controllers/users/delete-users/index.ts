@@ -1,3 +1,4 @@
+import I18n from "../../../i18n";
 import { User } from "../../../models/users";
 import { error, success } from "../../helpers";
 import { IController, HttpRequest, HttpResponse } from "../../protocols";
@@ -17,12 +18,12 @@ export class DeleteUserController implements IController {
     try {
       const id = httpRequest?.params?.id;
       if (!id) {
-        return error("Id is required");
+        return error(I18n.__("id.is.required"));
       }
       const user = await this.deleteUserRepository.deleteUser(id);
       return success(user);
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

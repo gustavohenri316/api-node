@@ -1,3 +1,4 @@
+import I18n from "../../../i18n";
 import { Permission } from "../../../models/permissions";
 import { Role } from "../../../models/roles";
 import { User } from "../../../models/users";
@@ -17,7 +18,6 @@ export interface IGetUsersRepository {
 
 export class GetUsersController implements IController {
   constructor(private readonly getUsersRepository: IGetUsersRepository) {}
-
   async handle(
     httpRequest: HttpRequest<{
       page: number;
@@ -61,6 +61,7 @@ export class GetUsersController implements IController {
             lastName: user.lastName,
             email: user.email,
             avatar_url: user.avatar_url,
+            isActive: user.isActive,
             roles: {
               title: roles && roles.title,
               description: roles && roles.description,
@@ -81,7 +82,7 @@ export class GetUsersController implements IController {
         users: usersWithRolesAndPermissions,
       });
     } catch (err) {
-      return error("Ocorreu um erro.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

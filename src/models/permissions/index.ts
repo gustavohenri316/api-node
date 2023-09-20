@@ -5,8 +5,8 @@ export interface Permission {
   key: string;
   createdAt: Date;
   createdBy: {
-    firstName: string;
-    lastName: string;
-    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
   };
 }

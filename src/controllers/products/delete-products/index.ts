@@ -1,3 +1,4 @@
+import I18n from "../../../i18n";
 import { Products } from "../../../models/products";
 import { error, success } from "../../helpers";
 import { IController, HttpRequest, HttpResponse } from "../../protocols";
@@ -19,12 +20,12 @@ export class DeleteProductsController implements IController {
     try {
       const id = httpRequest?.params?.id;
       if (!id) {
-        return error("Id is required");
+        return error(I18n.__("id.is.required"));
       }
       const Products = await this.deleteProductsRepository.deleteProducts(id);
       return success(Products);
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

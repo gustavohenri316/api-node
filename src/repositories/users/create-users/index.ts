@@ -12,6 +12,7 @@ export class MongoCreateUserRepository implements ICreateUserRepository {
     if (!params.avatar_url) {
       params.avatar_url = avatarUrl;
     }
+    params.isActive = true;
 
     const { insertedId } = await MongoClient.db
       .collection("users")

@@ -1,3 +1,4 @@
+import I18n from "../../../i18n";
 import { Role } from "../../../models/roles";
 import { error, success } from "../../helpers";
 import { IController, HttpRequest, HttpResponse } from "../../protocols";
@@ -22,11 +23,11 @@ export class UpdateRoleController implements IController {
       const body = httpRequest?.body;
 
       if (!body) {
-        return error("Body is required");
+        return error(I18n.__("body.is.required"));
       }
 
       if (!id) {
-        return error("Missing Role id");
+        return error(I18n.__("missing.id", { field: "Role" }));
       }
       const allowedFieldsTtoUpdate: (keyof UpdateRoleParams)[] = [
         "title",
@@ -38,12 +39,12 @@ export class UpdateRoleController implements IController {
       );
 
       if (someFieldIsNotAllowedToUpdate) {
-        return error("Some field is not allowed to update");
+        return error(I18n.__("some.field.is.not.allowed.to.update"));
       }
       const Role = await this.updateRoleRepository.updateRole(id, body);
       return success(Role);
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

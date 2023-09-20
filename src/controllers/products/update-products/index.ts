@@ -1,3 +1,4 @@
+import I18n from "../../../i18n";
 import { Products } from "../../../models/products";
 import { error, success } from "../../helpers";
 import { HttpRequest, HttpResponse, IController } from "../../protocols";
@@ -29,11 +30,11 @@ export class UpdateProductsController implements IController {
       const body = httpRequest?.body;
 
       if (!body) {
-        return error("Body is required");
+        return error(I18n.__("body.is.required"));
       }
 
       if (!id) {
-        return error("Missing Products id");
+        return error(I18n.__("missing.id", { field: "Products" }));
       }
       const allowedFieldsTtoUpdate: (keyof UpdateProductsParams)[] = [
         "category",
@@ -52,7 +53,7 @@ export class UpdateProductsController implements IController {
       );
 
       if (someFieldIsNotAllowedToUpdate) {
-        return error("Some field is not allowed to update");
+        return error(I18n.__("some.field.is.not.allowed.to.update"));
       }
       const Products = await this.updateProductsRepository.updateProducts(
         id,
@@ -60,7 +61,7 @@ export class UpdateProductsController implements IController {
       );
       return success(Products);
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

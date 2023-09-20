@@ -3,19 +3,17 @@ import jwt from "jsonwebtoken";
 import { User } from "../../../models/users";
 import { HttpRequest, HttpResponse, IController } from "../../protocols";
 import { error, success } from "../../helpers";
+import I18n from "../../../i18n";
 
 export interface LoginParams {
   email: string;
   password: string;
 }
-
 export interface ILoginRepository {
   getUserByEmail(email: string): Promise<User | null>;
 }
-
 export class LoginController implements IController {
   constructor(private readonly loginRepository: ILoginRepository) {}
-
   async handle(
     httpRequest: HttpRequest<LoginParams>
   ): Promise<HttpResponse<string>> {
@@ -24,17 +22,17 @@ export class LoginController implements IController {
       if (!body) {
         return error("Bad Request");
       }
-
       const user = await this.loginRepository.getUserByEmail(body.email);
       if (!user) {
         return error("Authentication failed", 401);
       }
-
+      if (!user.isActive) {
+        return error("User is not active", 401);
+      }
       const passwordMatch = await bcrypt.compare(body.password, user.password);
       if (!passwordMatch) {
         return error("Authentication failed", 401);
       }
-
       const token = jwt.sign(
         {
           id: user.id,
@@ -58,7 +56,7 @@ export class LoginController implements IController {
       };
       return success(send);
     } catch (err) {
-      return error("Something went wrong", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

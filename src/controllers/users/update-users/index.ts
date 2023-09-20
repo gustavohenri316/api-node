@@ -1,3 +1,4 @@
+import I18n from "../../../i18n";
 import { User } from "../../../models/users";
 import { error, success } from "../../helpers";
 import { HttpRequest, HttpResponse, IController } from "../../protocols";
@@ -6,6 +7,7 @@ export interface UpdateUserParams {
   id: string;
   firstName?: string;
   lastName?: string;
+  isActive?: boolean;
   email?: string;
   password?: string;
   avatar_url?: string;
@@ -26,11 +28,11 @@ export class UpdateUserController implements IController {
       const body = httpRequest?.body;
 
       if (!body) {
-        return error("Body is required");
+        return error(I18n.__("body.is.required"));
       }
 
       if (!id) {
-        return error("Missing user id");
+        return error(I18n.__("missing.id", { field: "User" }));
       }
       const allowedFieldsTtoUpdate: (keyof UpdateUserParams)[] = [
         "firstName",
@@ -39,6 +41,7 @@ export class UpdateUserController implements IController {
         "password",
         "avatar_url",
         "roles",
+        "isActive",
         "permissions",
       ];
 
@@ -46,12 +49,12 @@ export class UpdateUserController implements IController {
         (key) => !allowedFieldsTtoUpdate.includes(key as keyof UpdateUserParams)
       );
       if (someFieldIsNotAllowedToUpdate) {
-        return error("Some field is not allowed to update");
+        return error(I18n.__("some.field.is.not.allowed.to.update"));
       }
       const user = await this.updateUserRepository.updateUser(id, body);
       return success(user);
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

@@ -1,6 +1,7 @@
 import { HttpRequest, HttpResponse, IController } from "../../protocols";
 import { created, error } from "../../helpers";
 import { Role } from "../../../models/roles";
+import I18n from "../../../i18n";
 
 export interface CreateRolesParams {
   userId: string;
@@ -22,7 +23,10 @@ export class CreateRolesController implements IController {
       const { userId, title, description } = httpRequest.body || {};
 
       if (!userId || !title || !description) {
-        return error("User id, title, and description are required", 400);
+        return error(
+          I18n.__("user.id.title.and.description.are.required"),
+          400
+        );
       }
 
       const roles = await this.createRolesRepository.createRoles({
@@ -32,11 +36,8 @@ export class CreateRolesController implements IController {
       });
 
       return created(roles);
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: "Something went wrong",
-      };
+    } catch (err) {
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

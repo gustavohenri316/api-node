@@ -1,6 +1,7 @@
 import { HttpRequest, HttpResponse, IController } from "../../protocols";
 import { created, error } from "../../helpers";
 import { Permission } from "../../../models/permissions";
+import I18n from "../../../i18n";
 
 export interface CreatePermissionsParams {
   userId: string;
@@ -23,7 +24,10 @@ export class CreatePermissionsController implements IController {
     try {
       const { userId, title, description } = httpRequest.body || {};
       if (!userId || !title || !description) {
-        return error("User id, title, and description are required", 400);
+        return error(
+          I18n.__("user.id.title.and.description.are.required"),
+          400
+        );
       }
       const Permissions =
         await this.createPermissionsRepository.createPermissions({
@@ -33,7 +37,7 @@ export class CreatePermissionsController implements IController {
         });
       return created(Permissions);
     } catch (err) {
-      return error("Something went wrong", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

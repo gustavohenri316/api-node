@@ -3,9 +3,11 @@ import { User } from "../../../models/users";
 import { HttpRequest, HttpResponse, IController } from "../../protocols";
 import bcrypt from "bcrypt";
 import { created, error } from "../../helpers";
+import I18n from "../../../i18n";
 
 export interface CreateUserParams {
   firstName: string;
+  isActive: boolean;
   lastName: string;
   email: string;
   password: string;
@@ -27,14 +29,16 @@ export class CreateUserController implements IController {
       const requiredFields = ["firstName", "lastName", "email", "password"];
 
       for (const field of requiredFields) {
-        if (!httpRequest?.body?.[field as keyof CreateUserParams]?.length) {
-          return error(`Field ${field} is required`);
+        if (!httpRequest?.body?.[field as keyof CreateUserParams]) {
+          return error(I18n.__("field.is.required", { field: field }));
         }
       }
 
       const emailIsValid = validator.isEmail(httpRequest?.body!.email);
       if (!emailIsValid) {
-        return error(`Email ${httpRequest?.body!.email} is invalid`);
+        return error(
+          I18n.__("email.is.invalid", { email: httpRequest?.body!.email })
+        );
       }
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(
@@ -49,7 +53,7 @@ export class CreateUserController implements IController {
       );
       return created(user);
     } catch (err) {
-      return error("Something went wrong", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }

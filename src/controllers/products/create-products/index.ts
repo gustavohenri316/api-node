@@ -1,3 +1,4 @@
+import I18n from "../../../i18n";
 import { Products } from "../../../models/products";
 import { created, error } from "../../helpers";
 import { HttpRequest, HttpResponse, IController } from "../../protocols";
@@ -31,7 +32,7 @@ export class CreateProductsController implements IController {
       const body = httpRequest?.body;
 
       if (!body) {
-        return error("Body is required");
+        return error(I18n.__("body.is.required"));
       }
 
       const {
@@ -56,16 +57,16 @@ export class CreateProductsController implements IController {
 
       for (const field of requiredFields) {
         if (!body[field]) {
-          return error(`Field ${field} is required.`);
+          return error(I18n.__("field.is.required", { field: field }));
         }
       }
 
       if (!validator.isNumeric(quantity.toString())) {
-        return error("Quantity must be a numeric value.");
+        return error(I18n.__("quantity.must.be.a.numeric.value"));
       }
 
       if (!validator.isNumeric(price.toString())) {
-        return error("Price must be a numeric value.");
+        return error(I18n.__("price.must.be.a.numeric.value"));
       }
 
       const product: CreateProductsParams = {
@@ -83,7 +84,7 @@ export class CreateProductsController implements IController {
         await this.createProductsRepository.createProducts(product);
       return created(createdProduct);
     } catch (err) {
-      return error("Something went wrong.", 500);
+      return error(I18n.__("something.went.wrong"), 500);
     }
   }
 }
