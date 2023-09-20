@@ -1,16 +1,17 @@
 import { ObjectId } from "mongodb";
 import { MongoClient } from "../../../database/mongo";
-import { Role } from "../../../models/roles";
-import { IGetRolesRepository } from "../../../controllers/roles/get-roles";
+
 import { User } from "../../../models/users";
 import isValidObjectId from "bson-objectid";
+import { IGetPermissionsRepository } from "../../../controllers/permissions/get-permissions";
+import { Permission } from "../../../models/permissions";
 
-export class MongoGetRoleRepository implements IGetRolesRepository {
-  async getRoles(
+export class MongoGetPermissionRepository implements IGetPermissionsRepository {
+  async getPermissions(
     page: number,
     itemsPerPage: number,
     search?: string
-  ): Promise<{ roles: Role[]; totalItems: number }> {
+  ): Promise<{ Permissions: Permission[]; totalItems: number }> {
     const skip = (page - 1) * itemsPerPage;
     const query: {
       [key: string]: RegExp;
@@ -27,25 +28,25 @@ export class MongoGetRoleRepository implements IGetRolesRepository {
       query.push({});
     }
 
-    const collection = MongoClient.db.collection<Role>("roles");
+    const collection = MongoClient.db.collection<Permission>("permissions");
     const totalItems = await collection.countDocuments({ $or: query });
-    const RolesCursor = collection
+    const PermissionsCursor = collection
       .find({ $or: query })
       .skip(skip)
       .limit(itemsPerPage);
 
-    const rolesWithUserInfo = await RolesCursor.toArray();
+    const PermissionsWithUserInfo = await PermissionsCursor.toArray();
 
-    const rolesWithoutId = rolesWithUserInfo.map((role) => {
-      const { _id, ...rest } = role;
+    const PermissionsWithoutId = PermissionsWithUserInfo.map((Permission) => {
+      const { _id, ...rest } = Permission;
       return { ...rest, id: _id.toHexString() };
     });
 
-    for (let i = 0; i < rolesWithoutId.length; i++) {
-      const role = rolesWithoutId[i];
-      if (isValidObjectId(role.createdBy as unknown as string)) {
+    for (let i = 0; i < PermissionsWithoutId.length; i++) {
+      const Permission = PermissionsWithoutId[i];
+      if (isValidObjectId(Permission.createdBy as unknown as string)) {
         const userInfo = await this.getUserInfo(
-          role.createdBy as unknown as string
+          Permission.createdBy as unknown as string
         );
 
         const createdBy: {
@@ -54,28 +55,33 @@ export class MongoGetRoleRepository implements IGetRolesRepository {
           email: string;
         } = userInfo || { firstName: "", lastName: "", email: "" };
 
-        rolesWithoutId[i].createdBy = createdBy;
+        PermissionsWithoutId[i].createdBy = createdBy;
       } else {
-        console.error("Invalid userId:", role.createdBy);
+        console.error("Invalid userId:", Permission.createdBy);
       }
     }
 
-    return { roles: rolesWithoutId, totalItems };
+    return { Permissions: PermissionsWithoutId, totalItems };
   }
 
-  async getRoleById(roleId: string): Promise<Role | null> {
+  async getPermissionById(PermissionId: string): Promise<Permission | null> {
     try {
-      const role = await MongoClient.db
-        .collection<Role>("roles")
-        .findOne({ _id: new ObjectId(roleId) }, { projection: { _id: 0 } });
+      const Permission = await MongoClient.db
+        .collection<Permission>("permissions")
+        .findOne(
+          { _id: new ObjectId(PermissionId) },
+          { projection: { _id: 0 } }
+        );
 
-      if (role) {
-        return { ...role, id: roleId };
+      console.log("Permission", Permission);
+
+      if (Permission) {
+        return { ...Permission, id: PermissionId };
       }
 
       return null;
     } catch (error) {
-      throw new Error("Error fetching Role by ID");
+      throw new Error("Error fetching Permission by ID");
     }
   }
 

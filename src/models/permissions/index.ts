@@ -4,5 +4,9 @@ export interface Permission {
   description: string;
   key: string;
   createdAt: Date;
-  createdBy: string;
+  createdBy: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }

@@ -22,24 +22,18 @@ export class CreatePermissionsController implements IController {
   ): Promise<HttpResponse<Permission>> {
     try {
       const { userId, title, description } = httpRequest.body || {};
-
       if (!userId || !title || !description) {
         return error("User id, title, and description are required", 400);
       }
-
       const Permissions =
         await this.createPermissionsRepository.createPermissions({
           userId,
           title,
           description,
         });
-
       return created(Permissions);
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: "Something went wrong",
-      };
+    } catch (err) {
+      return error("Something went wrong", 500);
     }
   }
 }
