@@ -14,8 +14,9 @@ interface ProductsWithUser {
   supplier: string;
   userWhoRegistered: string;
   user: {
-    id: string;
-    name: string;
+    id: string | null;
+    email: string | null;
+    name: string | null;
   };
 }
 
@@ -108,28 +109,30 @@ export class GetProductsController implements IController {
 
     const productsWithUser: ProductsWithUser[] = [];
 
+    console.log(products);
+
     for (let i = 0; i < products.length; i++) {
       const product = products[i];
       const user = users[i];
-      if (user) {
-        const name = `${user.firstName} ${user.lastName}`;
-        const productWithUser: ProductsWithUser = {
-          id: product.id,
-          description: product.description,
-          quantity: product.quantity,
-          price: product.price,
-          image: product.image,
-          category: product.category,
-          supplier: product.supplier,
-          userWhoRegistered: product.userWhoRegistered,
-          user: {
-            id: user.id,
-            name,
-          },
-        };
 
-        productsWithUser.push(productWithUser);
-      }
+      const name = user ? `${user.firstName} ${user.lastName}` : null;
+      const productWithUser: ProductsWithUser = {
+        id: product.id,
+        description: product.description,
+        quantity: product.quantity,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        supplier: product.supplier,
+        userWhoRegistered: product.userWhoRegistered,
+        user: {
+          id: user ? user.id : null,
+          email: user ? user.email : null,
+          name,
+        },
+      };
+
+      productsWithUser.push(productWithUser);
     }
 
     const totalItems = await this.getProductsRepository.getTotalItems();

@@ -69,6 +69,8 @@ export class MongoGetProductRepository implements IGetProductsRepository {
         .collection<User>("users")
         .findOne({ _id: userId });
 
+      console.log();
+
       if (user) {
         return user;
       } else {
